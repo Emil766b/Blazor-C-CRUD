@@ -1,0 +1,78 @@
+﻿<!-- Tilføj side -->
+@page "/user/add"
+<!-- Rediger side -->
+@page "/user/edit/{userId:int}"
+@using BlazorApp.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>@Title Bruger</h1>
+<hr />
+<!-- Tilføj bruger form -->
+<EditForm Model="@user" OnValidSubmit="SaveUser">
+	<!-- Navn input -->
+	<div class="mb-3">
+		<lable for="Name" class="form-label">Navn</lable>
+		<div class="col-md-4">
+			<InputText class="form-control" @bind-Value="user.Name" />
+		</div>
+	</div>
+	<!-- Adresse input -->
+	<div class="mb-3">
+		<lable for="Address" class="form-label">Adresse</lable>
+		<div class="col-md-4">
+			<InputText class="form-control" @bind-Value="user.Address"/>
+		</div>
+	</div>
+	<!-- Knapper -->
+	<div class="form-group">
+		<!-- Gem knap -->
+		<button type="submit" class="btn btn-primary">Gem</button>
+		<!-- Afbryd knap -->
+		<button class="btn btn-light" @onclick="Cancel">Afbryd</button>
+	</div>
+</EditForm>
+@code {
+	// Component target parameter
+	[Parameter]
+	public int userId { get; set; }
+	// Skift titel til tilføj 
+	protected string Title = "Tilføj";
+	// Ny instans af user
+	protected User user = new();
+	// Kører Task anync 
+	protected override async Task OnParametersSetAsync()
+	{
+		// Hvis userId ikke er 0
+		if (userId != 0)
+		{
+			// Skift titel til Rediger
+			Title = "Rediger";
+			// Får userId fra user og sætter det efter edit
+			user = await Http.GetFromJsonAsync<User>("api/User/" + userId);
+		}
+	}
+	// SaveUser
+	protected async Task SaveUser()
+	{
+		// Hvis Id ikker er 0
+		if (user.Id != 0)
+		{
+			// Bruger PUT til at opdatere bruger i UserController
+			// Sender en PUT request med user formateret som JSON
+			await Http.PutAsJsonAsync("api/User", user);
+		} else
+		{
+			// Bruger POST til at oprette ny bruger i UserController
+			// Sender en POST request med user formateret som JSON
+			await Http.PostAsJsonAsync("api/User", user);
+		}
+		Cancel();
+	}
+	// Cancel
+	public void Cancel()
+	{
+		// Navigere tilbage til fetchuserdetails som er start siden
+		NavigationManager.NavigateTo("/fetchuserdetails");
+	}
+}

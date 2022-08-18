@@ -1,0 +1,57 @@
+﻿@page "/user/delete/{userId:int}"
+@using BlazorApp.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h2>Slet Bruger</h2>
+<br />
+
+<!-- Slet form -->
+<div class="form-group">
+	<h4>Vil du slette @user.Name?</h4>
+	<table class="table">
+		<tbody class="table">
+			<!-- Navn -->
+			<tr>
+				<td>@user.Name</td>
+			</tr>
+			<!-- Adresse-->
+			<tr>
+				<td>@user.Address</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<!-- Knapper -->
+<div class="form-group">
+	<!-- Slet knap -->
+	<input type="submit" value="Slet" @onclick="(async () => await RemoveUser(user.Id))" class="btn btn-danger" />
+	<!-- Afbryd knap -->
+	<input type="submit" value="Afbryd" @onclick="(() => Cancel())" class="btn btn-warning" />
+</div>
+
+@code {
+	[Parameter]
+	public int userId { get; set; }
+	User user = new User();
+	// Kører Task async
+	protected override async Task OnInitializedAsync()
+	{
+		// Retunere sti med user og userId
+		user = await Http.GetFromJsonAsync<User>("/api/User/" + Convert.ToInt32(userId));
+	}
+	// Remove user 
+	protected async Task RemoveUser(int userId)
+	{
+		// Sender en Delete request med det userId der skal slettes
+		await Http.DeleteAsync("api/User/" + userId);
+		// Navigere tilbage til start
+		NavigationManager.NavigateTo("/fetchuserdetails");
+	}
+	// Cancel 
+	void Cancel()
+	{
+		// Navigere tilbage til start 
+		NavigationManager.NavigateTo("/fetchuserdetails");
+	}
+}

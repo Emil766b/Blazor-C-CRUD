@@ -1,0 +1,110 @@
+﻿@page "/fetchuserdetails"
+@using BlazorApp.Shared.Models
+@inject HttpClient Http
+
+<h1>Bruger Data</h1>
+<p>Crud med Blazor</p>
+
+<div class="row">
+	<!-- Tilføj bruger knap -->
+	<div class="col-md-6">
+		<a href='/user/add' class="btn btn-primary" role="button">
+			<i class="fas fa-user-plus"></i>
+			Tilføj Bruger
+			</a>
+	</div>
+	<!-- Søgefelt -->
+	<div class="input-group col-sm">
+		<input type="text" class="form-control" placeholder="Søg efter bruger" 
+		@bind="SearchString" @bind:event="oninput" @onkeyup="FilterUser"/>
+		@if (SearchString.Length > 0)
+		{
+			<!-- Reset søgefelt -->
+			<div class="input-group-append">
+				<button class=" btn btn-danger" @onclick="ResetSearch">Ryd</button>
+			</div>
+		}
+	</div>
+</div>
+<br />
+
+<!-- Tabel med info fra databasen -->
+<table class="table table-striped align-middle table-bordered">
+	<!-- Felter i tabellen -->
+	<thead class="table-primary">
+		<tr>
+			<th>Id</th>
+			<th>Navn</th>
+			<th>Adresse</th>
+			<th>Action</th>
+		</tr>
+	</thead>
+	<tbody>
+		<!-- Vis ny linje for hver id Navn og adresse -->
+		@foreach (var user in userList)
+		{
+			<tr>
+				<td>@user.Id</td>
+				<td>@user.Name</td>
+				<td>@user.Address</td>
+				<td>
+					<!-- Rediger knap som går til rediger siden i AddUser.razor -->
+					<a href='/user/edit/@user.Id' class="btn btn-warning" role="button">Rediger</a>
+					<!-- Slet knap som går til DeleteUser.razor -->
+					<a href='/user/delete/@user.Id' class="btn btn-danger" role="button">Slet</a>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+
+@code {
+	// Ny insatns af liste med user til userList
+	protected List<User> userList = new();
+	// Ny insatns af liste med user til SearchUserData
+	protected List<User> SearchUserData = new();
+	// Ny instans af user
+	protected User user = new();
+	// Få streng med det der bliver søgt på
+	protected string SearchString { get; set; } = string.Empty;
+	// Initilaze task GetUser async
+	protected override async Task OnInitializedAsync()
+    {
+        await GetUser();
+    }
+	// GetUser
+    protected async Task GetUser()
+    {
+		// Retunere liste af user fra api/user i JSON format
+        userList = await Http.GetFromJsonAsync<List<User>>("api/User");
+        SearchUserData = userList;
+    }
+	// FilterUser
+	protected void FilterUser()
+	{
+		// Hvis ikke SearchString er tom eller null
+		if (!string.IsNullOrEmpty(SearchString))
+		{
+			// Soter liste baseret på input i SearchString 
+			userList = SearchUserData.Where(x => x.Name.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1).ToList();
+		} else
+		{
+			userList = SearchUserData;
+		}
+	}
+	// DeleteConfirm 
+    protected void DeleteConfirm(int userID)
+    {
+		// Får id fra userList og tjekker at det er det samme som userID
+        user = userList.FirstOrDefault(x => x.Id == userID);
+    }
+	// ResetSearch
+	protected void ResetSearch()
+	{
+		// Tømmer SearchString
+		SearchString = string.Empty;
+		userList = SearchUserData;
+	}
+
+}

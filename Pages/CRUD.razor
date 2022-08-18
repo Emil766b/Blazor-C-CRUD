@@ -1,0 +1,45 @@
+﻿@page "/CRUD"
+
+<PageTitle>CRUD</PageTitle>
+
+<h3>CRUD</h3>
+
+<div class="row justify-content-center">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Navn</th>
+                <th>Lokation</th>
+                <th colspan="2">Handling</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<!-- Tilføj data form -->
+<div class="container-fluid">
+<!-- Inline form der bruger process.php og metode post -->
+<form class="form-inline justify-content-center" action="process.php" method="POST">
+    <!-- Skjult input der indeholder id der skal bruges i post til at opdatere det der skal opdateres -->
+    <input type="hidden" name="id" value="<?php echo $id; ?>">
+    <!-- Session token -->
+    <input type="hidden" name="_token">
+        <!-- Navn input -->
+        <label class="m-2">Navn</label>
+        <!-- Input til navn som også kan bruges til at redigere navn, data for at redigere kommer fra edit i process.php -->
+        <input type="text" name="navn" class="form-control" placeholder="Indset navn">
+        <!-- Lokation input -->
+        <label class="m-2">Lokation</label>
+        <!-- Input til lokation som også kan bruges til at redigere lokation, data for at redigere kommer fra edit i process.php -->
+        <input type="text" name="lokation" class="form-control" placeholder="indset lokation">
+        <div class="form-check m-2">
+        </div>
+        <!-- Gem/Opdater knap -->
+        <button type="submit" class="btn btn-warning" name="update">Opdater</button>
+        <button type="submit" class="btn btn-primary" name="gem">Gem</button>
+    </form>
+</div>
+
+@code {
+
+}
